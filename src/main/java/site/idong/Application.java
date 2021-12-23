@@ -47,9 +47,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Application {
-    @Parameter(names={"--user"},help = true,required =true ,description = "ÓÃ»§µÇÂ¼ĞÅÏ¢£¨JSON¸ñÊ½£©")
+    @Parameter(names={"--user"},help = true,required =true ,description = "ç”¨æˆ·ç™»å½•ä¿¡æ¯ï¼ˆJSONæ ¼å¼ï¼‰")
     String user;
-    @Parameter(names = "--help", help = true,description = "°ïÖú")
+    @Parameter(names = "--help", help = true,description = "å¸®åŠ©")
     private boolean help;
     private static final Logger log = LoggerFactory.getLogger(Application.class);
     private static String ua="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.55 Safari/537.36 Edg/96.0.1054.43";
@@ -62,10 +62,10 @@ public class Application {
         JCommander jct = JCommander.newBuilder()
                 .addObject(main)
                 .build();
-        jct.setProgramName("ºÓº£´óÑ§½¡¿µÉÏ±¨ÏµÍ³");
+        jct.setProgramName("æ²³æµ·å¤§å­¦å¥åº·ä¸ŠæŠ¥ç³»ç»Ÿ");
         try {
             jct.parse(args);
-            // Ìá¹©°ïÖúËµÃ÷
+            // æä¾›å¸®åŠ©è¯´æ˜
             if (main.help) {
                 jct.usage();
                 return;
@@ -73,7 +73,7 @@ public class Application {
             main.run();
         }
         catch (ParameterException parameterException ){
-            // ÎªÁË·½±ãÊ¹ÓÃ£¬Í¬Ê±Êä³öexceptionµÄmessage
+            // ä¸ºäº†æ–¹ä¾¿ä½¿ç”¨ï¼ŒåŒæ—¶è¾“å‡ºexceptionçš„message
             System.out.printf(parameterException.toString()+"\r\n");
             jct.usage();
         }
@@ -86,20 +86,20 @@ public class Application {
             while (iter.hasNext()) {
 
                 JSONObject _user = (JSONObject) iter.next();
-                log.info("½âÎö³É¹¦£¬ÓÃ»§Ãû£º" + _user.getString("username"));
+                log.info("è§£ææˆåŠŸï¼Œç”¨æˆ·åï¼š" + _user.getString("username"));
                 Retryer<Integer> retryer = RetryerBuilder.<Integer>newBuilder()
                         .retryIfResult(result -> result == -1)
-                        // ÉèÖÃ×î´óÖ´ĞĞ´ÎÊı3´Î
+                        // è®¾ç½®æœ€å¤§æ‰§è¡Œæ¬¡æ•°3æ¬¡
                         .withStopStrategy(StopStrategies.stopAfterAttempt(3)).build();
                 try {
                     retryer.call(() -> doReport(_user.getString("username"), _user.getString("password")));
                 } catch (Exception e) {
-                    log.error("ÖØÊÔ½áÊø£¬Òì³££º" + e.getMessage());
+                    log.error("é‡è¯•ç»“æŸï¼Œå¼‚å¸¸ï¼š" + e.getMessage());
                     isAllSuccess = false;
                 }
             }
             if (isAllSuccess != Boolean.TRUE) {
-                throw new Exception("²¿·Ö´ò¿¨Î´³É¹¦");
+                throw new Exception("éƒ¨åˆ†æ‰“å¡æœªæˆåŠŸ");
             }
         } catch (Exception e){
             System.exit(0);
@@ -129,31 +129,31 @@ public class Application {
             public Integer call() throws Exception {
                 Code code = newReport(username,password);
                 if(code == Code.CHANGE_EHHU) {
-                    log.info("³¢ÊÔÇĞ»»µ½EºÓº£½Ó¿Ú´ò¿¨");
+                    log.info("å°è¯•åˆ‡æ¢åˆ°Eæ²³æµ·æ¥å£æ‰“å¡");
                     code = oldReport(username, password);
                     if(code == Code.EXIT){
-                        log.error("´ò¿¨Ê§°Ü");
+                        log.error("æ‰“å¡å¤±è´¥");
                         return 0;
                     }
                     if(code == Code.RETRY){
-                        log.error("×¼±¸ÖØÊÔ");
+                        log.error("å‡†å¤‡é‡è¯•");
                         return -1;
                     }
                     else if(code == Code.OK){
-                        log.info("´ò¿¨³É¹¦");
+                        log.info("æ‰“å¡æˆåŠŸ");
                         return 0;
                     }
                 }
                 else if(code == Code.EXIT){
-                    log.error("´ò¿¨Ê§°Ü");
+                    log.error("æ‰“å¡å¤±è´¥");
                     return 0;
                 }
                 if(code == Code.RETRY){
-                    log.error("×¼±¸ÖØÊÔ");
+                    log.error("å‡†å¤‡é‡è¯•");
                     return -1;
                 }
                 else if(code == Code.OK){
-                    log.info("´ò¿¨³É¹¦");
+                    log.info("æ‰“å¡æˆåŠŸ");
                     return 0;
                 }
                 return 0;
@@ -183,20 +183,20 @@ public class Application {
         return targetList;
     }
     private static Code oldReport(String username, String password) {
-        // È«¾ÖÇëÇóÉèÖÃ
+        // å…¨å±€è¯·æ±‚è®¾ç½®
         RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).setCircularRedirectsAllowed(true).build();
-        // ´´½¨cookie storeµÄ±¾µØÊµÀı
+        // åˆ›å»ºcookie storeçš„æœ¬åœ°å®ä¾‹
         CookieStore cookieStore =  new BasicCookieStore();
-        // ´´½¨HttpClientÉÏÏÂÎÄ
+        // åˆ›å»ºHttpClientä¸Šä¸‹æ–‡
         HttpClientContext context = HttpClientContext.create();
         context.setCookieStore(cookieStore);
 
-        // ´´½¨Ò»¸öHttpClient
+        // åˆ›å»ºä¸€ä¸ªHttpClient
         CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(globalConfig)
                 .setDefaultCookieStore(cookieStore).build();
 
         CloseableHttpResponse res =  null ;
-        log.info("ÕıÔÚÊ¹ÓÃEºÓº£´ò¿¨");
+        log.info("æ­£åœ¨ä½¿ç”¨Eæ²³æµ·æ‰“å¡");
         HttpPost httpPost = new HttpPost("http://mids.hhu.edu.cn/_ids_mobile/login18_9");
         List<NameValuePair> nvps = new ArrayList<>();
         nvps.add(new BasicNameValuePair("username", username));
@@ -205,7 +205,7 @@ public class Application {
         try {
             res = httpClient.execute(httpPost,context);
             if(res.getFirstHeader("loginErrCode") != null){
-                log.error("ÓÃ»§Ãû»òÃÜÂë´íÎó£¬´íÎó´úÂë£º"+res.getFirstHeader("loginErrCode").getValue());
+                log.error("ç”¨æˆ·åæˆ–å¯†ç é”™è¯¯ï¼Œé”™è¯¯ä»£ç ï¼š"+res.getFirstHeader("loginErrCode").getValue());
                 return Code.EXIT;
             }
             else{
@@ -219,7 +219,7 @@ public class Application {
                         cookie.setDomain("form.hhu.edu.cn");
                         cookieStore.addCookie(cookie);
                     }
-                    log.info("EºÓº£µÇÂ¼³É¹¦");
+                    log.info("Eæ²³æµ·ç™»å½•æˆåŠŸ");
                     res.close();
                     HttpGet httpGet = new HttpGet("http://form.hhu.edu.cn/pdc/form/list");
                     res = httpClient.execute(httpGet,context);
@@ -230,10 +230,10 @@ public class Application {
                         log.error(e.toString());
                         return Code.RETRY;
                     }
-                    if(page.contains("½¡¿µ´ò¿¨")){
-                        if(page.contains("±¾¿ÆÉú")){
+                    if(page.contains("å¥åº·æ‰“å¡")){
+                        if(page.contains("æœ¬ç§‘ç”Ÿ")){
                             res.close();
-                            log.info("form.hhu.edu.cnÊ¶±ğ³É¹¦£¬Éí·İ£º±¾¿ÆÉú");
+                            log.info("form.hhu.edu.cnè¯†åˆ«æˆåŠŸï¼Œèº«ä»½ï¼šæœ¬ç§‘ç”Ÿ");
                             httpGet = new HttpGet("http://form.hhu.edu.cn/pdc/formDesignApi/S/gUTwwojq");
                             res = httpClient.execute(httpGet,context);
                             try {
@@ -242,14 +242,14 @@ public class Application {
                                 log.error(e.toString());
                                 return Code.RETRY;
                             }
-                            if(page.contains("Î´Öª´íÎó")){
-                                log.error("form.hhu.edu.cnÏµÍ³Òì³£");
+                            if(page.contains("æœªçŸ¥é”™è¯¯")){
+                                log.error("form.hhu.edu.cnç³»ç»Ÿå¼‚å¸¸");
                                 return Code.RETRY;
                             }
                             String wid = regEx("(?<=_selfFormWid = \\')(.*?)(?=\\')", page).get(0);
                             String uid = regEx("(?<=_userId = \\')(.*?)(?=\\')", page).get(0);
                             String fillDetail = regEx("(?<=fillDetail = )(.*?)(?=\\;)", page).get(0);
-                            String json = "{\"XGH_336526\": \"Ñ§ºÅ\",\"XM_1474\": \"ĞÕÃû\",\"SFZJH_859173\": \"Éí·İÖ¤ºÅ\",\"SELECT_941320\": \"Ñ§Ôº\",\"SELECT_459666\": \"Äê¼¶\",\"SELECT_814855\": \"×¨Òµ\",\"SELECT_525884\": \"°à¼¶\",\"SELECT_125597\": \"ËŞÉáÂ¥\",\"TEXT_950231\": \"ËŞÉáºÅ\",\"TEXT_937296\": \"ÊÖ»úºÅ\",\"RADIO_6555\": \"ÄúµÄÌåÎÂÇé¿ö£¿\",\"RADIO_535015\": \"Äú½ñÌìÊÇ·ñÔÚĞ££¿\",\"RADIO_891359\": \"±¾ÈË½¡¿µÇé¿ö£¿\",\"RADIO_372002\": \"Í¬×¡ÈË½¡¿µÇé¿ö£¿\",\"RADIO_618691\": \"±¾ÈË¼°Í¬×¡ÈË14ÌìÄÚÊÇ·ñÓĞÖĞ¸ß·çÏÕµØÇøÂÃ¾ÓÊ·»ò½Ó´¥¹ıÖĞ¸ß·çÏÕµØÇøÈËÔ±£¿\"}";
+                            String json = "{\"XGH_336526\": \"å­¦å·\",\"XM_1474\": \"å§“å\",\"SFZJH_859173\": \"èº«ä»½è¯å·\",\"SELECT_941320\": \"å­¦é™¢\",\"SELECT_459666\": \"å¹´çº§\",\"SELECT_814855\": \"ä¸“ä¸š\",\"SELECT_525884\": \"ç­çº§\",\"SELECT_125597\": \"å®¿èˆæ¥¼\",\"TEXT_950231\": \"å®¿èˆå·\",\"TEXT_937296\": \"æ‰‹æœºå·\",\"RADIO_6555\": \"æ‚¨çš„ä½“æ¸©æƒ…å†µï¼Ÿ\",\"RADIO_535015\": \"æ‚¨ä»Šå¤©æ˜¯å¦åœ¨æ ¡ï¼Ÿ\",\"RADIO_891359\": \"æœ¬äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_372002\": \"åŒä½äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_618691\": \"æœ¬äººåŠåŒä½äºº14å¤©å†…æ˜¯å¦æœ‰ä¸­é«˜é£é™©åœ°åŒºæ—…å±…å²æˆ–æ¥è§¦è¿‡ä¸­é«˜é£é™©åœ°åŒºäººå‘˜ï¼Ÿ\"}";
                             JSONObject col = JSON.parseObject(json);
                             JSONArray fills = JSON.parseArray(fillDetail);
                             JSONObject fill = (JSONObject) fills.get(0);
@@ -268,7 +268,7 @@ public class Application {
                             res = httpClient.execute(httpPost,context);
                             try {
                                 if(EntityUtils.toString(res.getEntity()).equals("{\"result\":true}")){
-                                    log.info("´ò¿¨³É¹¦");
+                                    log.info("æ‰“å¡æˆåŠŸ");
                                     iter = col.entrySet().iterator();
                                     while (iter.hasNext()) {
                                         Map.Entry entry = (Map.Entry) iter.next();
@@ -277,7 +277,7 @@ public class Application {
                                     return Code.OK;
                                 }
                                 else{
-                                    log.error("´ò¿¨Ê§°Ü");
+                                    log.error("æ‰“å¡å¤±è´¥");
                                     return Code.RETRY;
                                 }
                             } catch (ParseException e) {
@@ -285,9 +285,9 @@ public class Application {
                                 return Code.RETRY;
                             }
                         }
-                        else if(page.contains("ÑĞ¾¿Éú")){
+                        else if(page.contains("ç ”ç©¶ç”Ÿ")){
                             res.close();
-                            log.info("form.hhu.edu.cnÊ¶±ğ³É¹¦£¬Éí·İ£ºÑĞ¾¿Éú");
+                            log.info("form.hhu.edu.cnè¯†åˆ«æˆåŠŸï¼Œèº«ä»½ï¼šç ”ç©¶ç”Ÿ");
                             httpGet = new HttpGet("http://form.hhu.edu.cn/pdc/formDesignApi/S/xznuPIjG");
                             res = httpClient.execute(httpGet,context);
                             try {
@@ -296,14 +296,14 @@ public class Application {
                                 log.error(e.toString());
                                 return Code.RETRY;
                             }
-                            if(page.contains("Î´Öª´íÎó")){
-                                log.error("form.hhu.edu.cnÏµÍ³Òì³£");
+                            if(page.contains("æœªçŸ¥é”™è¯¯")){
+                                log.error("form.hhu.edu.cnç³»ç»Ÿå¼‚å¸¸");
                                 return Code.RETRY;
                             }
                             String wid = regEx("(?<=_selfFormWid = \\')(.*?)(?=\\')", page).get(0);
                             String uid = regEx("(?<=_userId = \\')(.*?)(?=\\')", page).get(0);
                             String fillDetail = regEx("(?<=fillDetail = )(.*?)(?=\\;)", page).get(0);
-                            String json = "{\"XGH_566872\": \"Ñ§ºÅ\",\"XM_140773\": \"ĞÕÃû\",\"SFZJH_402404\": \"Éí·İÖ¤ºÅ\",\"SZDW_439708\": \"Ñ§Ôº\",\"ZY_878153\": \"×¨Òµ\",\"GDXW_926421\": \"¹¥¶ÁÑ§Î»\",\"DSNAME_606453\":\"µ¼Ê¦\",\"PYLB_253720\": \"ÅàÑøÀà±ğ\",\"SELECT_172548\": \"ËŞÉáÂ¥\",\"TEXT_91454\": \"ËŞÉáºÅ\",\"TEXT_24613\": \"ÊÖ»úºÅ\",\"TEXT_826040\": \"½ô¼±ÁªÏµÈËµç»°\",\"RADIO_799044\": \"ÄúµÄÌåÎÂÇé¿ö£¿\",\"RADIO_384811\": \"Äú½ñÌìÊÇ·ñÔÚĞ££¿\",\"RADIO_907280\": \"±¾ÈË½¡¿µÇé¿ö£¿\",\"RADIO_716001\": \"Í¬×¡ÈË½¡¿µÇé¿ö£¿\",\"RADIO_248990\": \"±¾ÈË¼°Í¬×¡ÈË14ÌìÄÚÊÇ·ñÓĞÖĞ¸ß·çÏÕµØÇøÂÃ¾ÓÊ·»ò½Ó´¥¹ıÖĞ¸ß·çÏÕµØÇøÈËÔ±£¿\"}";
+                            String json = "{\"XGH_566872\": \"å­¦å·\",\"XM_140773\": \"å§“å\",\"SFZJH_402404\": \"èº«ä»½è¯å·\",\"SZDW_439708\": \"å­¦é™¢\",\"ZY_878153\": \"ä¸“ä¸š\",\"GDXW_926421\": \"æ”»è¯»å­¦ä½\",\"DSNAME_606453\":\"å¯¼å¸ˆ\",\"PYLB_253720\": \"åŸ¹å…»ç±»åˆ«\",\"SELECT_172548\": \"å®¿èˆæ¥¼\",\"TEXT_91454\": \"å®¿èˆå·\",\"TEXT_24613\": \"æ‰‹æœºå·\",\"TEXT_826040\": \"ç´§æ€¥è”ç³»äººç”µè¯\",\"RADIO_799044\": \"æ‚¨çš„ä½“æ¸©æƒ…å†µï¼Ÿ\",\"RADIO_384811\": \"æ‚¨ä»Šå¤©æ˜¯å¦åœ¨æ ¡ï¼Ÿ\",\"RADIO_907280\": \"æœ¬äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_716001\": \"åŒä½äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_248990\": \"æœ¬äººåŠåŒä½äºº14å¤©å†…æ˜¯å¦æœ‰ä¸­é«˜é£é™©åœ°åŒºæ—…å±…å²æˆ–æ¥è§¦è¿‡ä¸­é«˜é£é™©åœ°åŒºäººå‘˜ï¼Ÿ\"}";
                             JSONObject col = JSON.parseObject(json);
                             JSONArray fills = JSON.parseArray(fillDetail);
                             JSONObject fill = (JSONObject) fills.get(0);
@@ -323,7 +323,7 @@ public class Application {
                             res = httpClient.execute(httpPost,context);
                             try {
                                 if(EntityUtils.toString(res.getEntity()).equals("{\"result\":true}")){
-                                    log.info("´ò¿¨³É¹¦");
+                                    log.info("æ‰“å¡æˆåŠŸ");
                                     iter = col.entrySet().iterator();
                                     while (iter.hasNext()) {
                                         Map.Entry entry = (Map.Entry) iter.next();
@@ -332,7 +332,7 @@ public class Application {
                                     return Code.OK;
                                 }
                                 else{
-                                    log.error("´ò¿¨Ê§°Ü");
+                                    log.error("æ‰“å¡å¤±è´¥");
                                     return Code.RETRY;
                                 }
                             } catch (ParseException e) {
@@ -342,18 +342,18 @@ public class Application {
                         }
                         else{
                             res.close();
-                            log.error("form.hhu.edu.cnÊ¶±ğÊ§°Ü£¬Éí·İ£ºÎ´Öª");
+                            log.error("form.hhu.edu.cnè¯†åˆ«å¤±è´¥ï¼Œèº«ä»½ï¼šæœªçŸ¥");
                             return Code.RETRY;
                         }
                     }
                     else{
                         res.close();
-                        log.error("´ò¿¨Ò³Ãæ½âÎöÊ§°Ü£¡");
+                        log.error("æ‰“å¡é¡µé¢è§£æå¤±è´¥ï¼");
                         return Code.RETRY;
                     }
                 }
                 else{
-                    log.error("Ô¶³Ì·şÎñÆ÷Òì³£");
+                    log.error("è¿œç¨‹æœåŠ¡å™¨å¼‚å¸¸");
                     return Code.RETRY;
                 }
             }
@@ -365,20 +365,20 @@ public class Application {
     }
     private static Code newReport(String username, String password) {
         if(password.matches("[0-9]+")){
-            log.warn("ÃÜÂëÎªÈõÃÜÂë£¬ÇĞ»»µ½EºÓº£½Ó¿Ú");
+            log.warn("å¯†ç ä¸ºå¼±å¯†ç ï¼Œåˆ‡æ¢åˆ°Eæ²³æµ·æ¥å£");
             return Code.CHANGE_EHHU;
         }
         else{
 
-            // È«¾ÖÇëÇóÉèÖÃ
+            // å…¨å±€è¯·æ±‚è®¾ç½®
             RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).setCircularRedirectsAllowed(true).build();
-            // ´´½¨cookie storeµÄ±¾µØÊµÀı
+            // åˆ›å»ºcookie storeçš„æœ¬åœ°å®ä¾‹
             CookieStore cookieStore =  new BasicCookieStore();
-            // ´´½¨HttpClientÉÏÏÂÎÄ
+            // åˆ›å»ºHttpClientä¸Šä¸‹æ–‡
             HttpClientContext context = HttpClientContext.create();
             context.setCookieStore(cookieStore);
 
-            // ´´½¨Ò»¸öHttpClient
+            // åˆ›å»ºä¸€ä¸ªHttpClient
             CloseableHttpClient httpClient = HttpClients.custom().setDefaultRequestConfig(globalConfig)
                     .setDefaultCookieStore(cookieStore).build();
 
@@ -390,12 +390,12 @@ public class Application {
                 try {
                     if(EntityUtils.toString(res.getEntity()).equals("true")){
                         res.close();
-                        log.warn("¸ÃÓÃ»§ĞèÊäÈëÑéÖ¤Âë·½¿ÉµÇÂ¼ĞÂ°æÃÅ»§£¬ÇĞ»»µ½EºÓº£´ò¿¨½Ó¿Ú");
+                        log.warn("è¯¥ç”¨æˆ·éœ€è¾“å…¥éªŒè¯ç æ–¹å¯ç™»å½•æ–°ç‰ˆé—¨æˆ·ï¼Œåˆ‡æ¢åˆ°Eæ²³æµ·æ‰“å¡æ¥å£");
                         return Code.CHANGE_EHHU;
                     }
                     else{
                         res.close();
-                        log.info("ÕıÔÚÊ¹ÓÃĞÂ°æÃÅ»§´ò¿¨");
+                        log.info("æ­£åœ¨ä½¿ç”¨æ–°ç‰ˆé—¨æˆ·æ‰“å¡");
                         httpGet = new HttpGet("http://authserver.hhu.edu.cn/authserver/login");
                         res = httpClient.execute(httpGet,context);
                         Document document = Jsoup.parse(EntityUtils.toString(res.getEntity()));
@@ -408,7 +408,7 @@ public class Application {
                         String pwdDefaultEncryptSalt = Objects.requireNonNull(Objects.requireNonNull(document.getElementById("casLoginForm")).getElementById("pwdDefaultEncryptSalt")).attr("value");
                         String encrypt = encrypt(password,pwdDefaultEncryptSalt);
                         if(encrypt == null){
-                            log.error("ÃÜÂë¼ÓÃÜÊ§°Ü£¬ÇĞ»»µ½EºÓº£´ò¿¨½Ó¿Ú");
+                            log.error("å¯†ç åŠ å¯†å¤±è´¥ï¼Œåˆ‡æ¢åˆ°Eæ²³æµ·æ‰“å¡æ¥å£");
                             return Code.CHANGE_EHHU;
                         }
                         else{
@@ -432,25 +432,25 @@ public class Application {
                             }
                             if(url.contains("http://authserver.hhu.edu.cn/authserver/index.do")){
                                 res.close();
-                                log.info("ĞÂ°æÃÅ»§µÇÂ½³É¹¦£¡");
+                                log.info("æ–°ç‰ˆé—¨æˆ·ç™»é™†æˆåŠŸï¼");
                                 httpGet = new HttpGet("http://dailyreport.hhu.edu.cn/pdc/form/list");
                                 res = httpClient.execute(httpGet,context);
                                 String page = EntityUtils.toString(res.getEntity());
-                                if(page.contains("½¡¿µ´ò¿¨")){
-                                    if(page.contains("±¾¿ÆÉú")){
+                                if(page.contains("å¥åº·æ‰“å¡")){
+                                    if(page.contains("æœ¬ç§‘ç”Ÿ")){
                                         res.close();
-                                        log.info("dailyreport.hhu.edu.cnÊ¶±ğ³É¹¦£¬Éí·İ£º±¾¿ÆÉú");
+                                        log.info("dailyreport.hhu.edu.cnè¯†åˆ«æˆåŠŸï¼Œèº«ä»½ï¼šæœ¬ç§‘ç”Ÿ");
                                         httpGet = new HttpGet("http://dailyreport.hhu.edu.cn/pdc/formDesignApi/S/gUTwwojq");
                                         res = httpClient.execute(httpGet,context);
                                         page = EntityUtils.toString(res.getEntity());
-                                        if(page.contains("Î´Öª´íÎó")){
-                                            log.error("dailyreport.hhu.edu.cnÏµÍ³Òì³££¬³¢ÊÔÇĞ»»");
+                                        if(page.contains("æœªçŸ¥é”™è¯¯")){
+                                            log.error("dailyreport.hhu.edu.cnç³»ç»Ÿå¼‚å¸¸ï¼Œå°è¯•åˆ‡æ¢");
                                             return Code.CHANGE_EHHU;
                                         }
                                         String wid = regEx("(?<=_selfFormWid = \\')(.*?)(?=\\')", page).get(0);
                                         String uid = regEx("(?<=_userId = \\')(.*?)(?=\\')", page).get(0);
                                         String fillDetail = regEx("(?<=fillDetail = )(.*?)(?=\\;)", page).get(0);
-                                        String json = "{\"XGH_336526\": \"Ñ§ºÅ\",\"XM_1474\": \"ĞÕÃû\",\"SFZJH_859173\": \"Éí·İÖ¤ºÅ\",\"SELECT_941320\": \"Ñ§Ôº\",\"SELECT_459666\": \"Äê¼¶\",\"SELECT_814855\": \"×¨Òµ\",\"SELECT_525884\": \"°à¼¶\",\"SELECT_125597\": \"ËŞÉáÂ¥\",\"TEXT_950231\": \"ËŞÉáºÅ\",\"TEXT_937296\": \"ÊÖ»úºÅ\",\"RADIO_6555\": \"ÄúµÄÌåÎÂÇé¿ö£¿\",\"RADIO_535015\": \"Äú½ñÌìÊÇ·ñÔÚĞ££¿\",\"RADIO_891359\": \"±¾ÈË½¡¿µÇé¿ö£¿\",\"RADIO_372002\": \"Í¬×¡ÈË½¡¿µÇé¿ö£¿\",\"RADIO_618691\": \"±¾ÈË¼°Í¬×¡ÈË14ÌìÄÚÊÇ·ñÓĞÖĞ¸ß·çÏÕµØÇøÂÃ¾ÓÊ·»ò½Ó´¥¹ıÖĞ¸ß·çÏÕµØÇøÈËÔ±£¿\"}";
+                                        String json = "{\"XGH_336526\": \"å­¦å·\",\"XM_1474\": \"å§“å\",\"SFZJH_859173\": \"èº«ä»½è¯å·\",\"SELECT_941320\": \"å­¦é™¢\",\"SELECT_459666\": \"å¹´çº§\",\"SELECT_814855\": \"ä¸“ä¸š\",\"SELECT_525884\": \"ç­çº§\",\"SELECT_125597\": \"å®¿èˆæ¥¼\",\"TEXT_950231\": \"å®¿èˆå·\",\"TEXT_937296\": \"æ‰‹æœºå·\",\"RADIO_6555\": \"æ‚¨çš„ä½“æ¸©æƒ…å†µï¼Ÿ\",\"RADIO_535015\": \"æ‚¨ä»Šå¤©æ˜¯å¦åœ¨æ ¡ï¼Ÿ\",\"RADIO_891359\": \"æœ¬äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_372002\": \"åŒä½äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_618691\": \"æœ¬äººåŠåŒä½äºº14å¤©å†…æ˜¯å¦æœ‰ä¸­é«˜é£é™©åœ°åŒºæ—…å±…å²æˆ–æ¥è§¦è¿‡ä¸­é«˜é£é™©åœ°åŒºäººå‘˜ï¼Ÿ\"}";
                                         JSONObject col = JSON.parseObject(json);
                                         JSONArray fills = JSON.parseArray(fillDetail);
                                         JSONObject fill = (JSONObject) fills.get(0);
@@ -468,7 +468,7 @@ public class Application {
                                         httpPost.setEntity(new UrlEncodedFormEntity(post, StandardCharsets.UTF_8));
                                         res = httpClient.execute(httpPost,context);
                                         if(EntityUtils.toString(res.getEntity()).equals("{\"result\":true}")){
-                                            log.info("´ò¿¨³É¹¦");
+                                            log.info("æ‰“å¡æˆåŠŸ");
                                             iter = col.entrySet().iterator();
                                             while (iter.hasNext()) {
                                                 Map.Entry entry = (Map.Entry) iter.next();
@@ -477,24 +477,24 @@ public class Application {
                                             return Code.OK;
                                         }
                                         else{
-                                            log.error("´ò¿¨Ê§°Ü");
+                                            log.error("æ‰“å¡å¤±è´¥");
                                             return Code.RETRY;
                                         }
                                     }
-                                    else if(page.contains("ÑĞ¾¿Éú")){
+                                    else if(page.contains("ç ”ç©¶ç”Ÿ")){
                                         res.close();
-                                        log.info("dailyreport.hhu.edu.cnÊ¶±ğ³É¹¦£¬Éí·İ£ºÑĞ¾¿Éú");
+                                        log.info("dailyreport.hhu.edu.cnè¯†åˆ«æˆåŠŸï¼Œèº«ä»½ï¼šç ”ç©¶ç”Ÿ");
                                         httpGet = new HttpGet("http://dailyreport.hhu.edu.cn/pdc/formDesignApi/S/xznuPIjG");
                                         res = httpClient.execute(httpGet,context);
                                         page = EntityUtils.toString(res.getEntity());
-                                        if(page.contains("Î´Öª´íÎó")){
-                                            log.error("dailyreport.hhu.edu.cnÏµÍ³Òì³££¬³¢ÊÔÇĞ»»");
+                                        if(page.contains("æœªçŸ¥é”™è¯¯")){
+                                            log.error("dailyreport.hhu.edu.cnç³»ç»Ÿå¼‚å¸¸ï¼Œå°è¯•åˆ‡æ¢");
                                             return Code.CHANGE_EHHU;
                                         }
                                         String wid = regEx("(?<=_selfFormWid = \\')(.*?)(?=\\')", page).get(0);
                                         String uid = regEx("(?<=_userId = \\')(.*?)(?=\\')", page).get(0);
                                         String fillDetail = regEx("(?<=fillDetail = )(.*?)(?=\\;)", page).get(0);
-                                        String json = "{\"XGH_566872\": \"Ñ§ºÅ\",\"XM_140773\": \"ĞÕÃû\",\"SFZJH_402404\": \"Éí·İÖ¤ºÅ\",\"SZDW_439708\": \"Ñ§Ôº\",\"ZY_878153\": \"×¨Òµ\",\"GDXW_926421\": \"¹¥¶ÁÑ§Î»\",\"DSNAME_606453\":\"µ¼Ê¦\",\"PYLB_253720\": \"ÅàÑøÀà±ğ\",\"SELECT_172548\": \"ËŞÉáÂ¥\",\"TEXT_91454\": \"ËŞÉáºÅ\",\"TEXT_24613\": \"ÊÖ»úºÅ\",\"TEXT_826040\": \"½ô¼±ÁªÏµÈËµç»°\",\"RADIO_799044\": \"ÄúµÄÌåÎÂÇé¿ö£¿\",\"RADIO_384811\": \"Äú½ñÌìÊÇ·ñÔÚĞ££¿\",\"RADIO_907280\": \"±¾ÈË½¡¿µÇé¿ö£¿\",\"RADIO_716001\": \"Í¬×¡ÈË½¡¿µÇé¿ö£¿\",\"RADIO_248990\": \"±¾ÈË¼°Í¬×¡ÈË14ÌìÄÚÊÇ·ñÓĞÖĞ¸ß·çÏÕµØÇøÂÃ¾ÓÊ·»ò½Ó´¥¹ıÖĞ¸ß·çÏÕµØÇøÈËÔ±£¿\"}";
+                                        String json = "{\"XGH_566872\": \"å­¦å·\",\"XM_140773\": \"å§“å\",\"SFZJH_402404\": \"èº«ä»½è¯å·\",\"SZDW_439708\": \"å­¦é™¢\",\"ZY_878153\": \"ä¸“ä¸š\",\"GDXW_926421\": \"æ”»è¯»å­¦ä½\",\"DSNAME_606453\":\"å¯¼å¸ˆ\",\"PYLB_253720\": \"åŸ¹å…»ç±»åˆ«\",\"SELECT_172548\": \"å®¿èˆæ¥¼\",\"TEXT_91454\": \"å®¿èˆå·\",\"TEXT_24613\": \"æ‰‹æœºå·\",\"TEXT_826040\": \"ç´§æ€¥è”ç³»äººç”µè¯\",\"RADIO_799044\": \"æ‚¨çš„ä½“æ¸©æƒ…å†µï¼Ÿ\",\"RADIO_384811\": \"æ‚¨ä»Šå¤©æ˜¯å¦åœ¨æ ¡ï¼Ÿ\",\"RADIO_907280\": \"æœ¬äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_716001\": \"åŒä½äººå¥åº·æƒ…å†µï¼Ÿ\",\"RADIO_248990\": \"æœ¬äººåŠåŒä½äºº14å¤©å†…æ˜¯å¦æœ‰ä¸­é«˜é£é™©åœ°åŒºæ—…å±…å²æˆ–æ¥è§¦è¿‡ä¸­é«˜é£é™©åœ°åŒºäººå‘˜ï¼Ÿ\"}";
                                         JSONObject col = JSON.parseObject(json);
                                         JSONArray fills = JSON.parseArray(fillDetail);
                                         JSONObject fill = (JSONObject) fills.get(0);
@@ -513,7 +513,7 @@ public class Application {
                                         httpPost.setEntity(new UrlEncodedFormEntity(post, StandardCharsets.UTF_8));
                                         res = httpClient.execute(httpPost,context);
                                         if(EntityUtils.toString(res.getEntity()).equals("{\"result\":true}")){
-                                            log.info("´ò¿¨³É¹¦");
+                                            log.info("æ‰“å¡æˆåŠŸ");
                                             iter = col.entrySet().iterator();
                                             while (iter.hasNext()) {
                                                 Map.Entry entry = (Map.Entry) iter.next();
@@ -522,19 +522,19 @@ public class Application {
                                             return Code.OK;
                                         }
                                         else{
-                                            log.error("´ò¿¨Ê§°Ü");
+                                            log.error("æ‰“å¡å¤±è´¥");
                                             return Code.CHANGE_EHHU;
                                         }
                                     }
                                     else{
                                         res.close();
-                                        log.error("dailyreport.hhu.edu.cnÊ¶±ğÊ§°Ü£¬Éí·İ£ºÎ´Öª");
+                                        log.error("dailyreport.hhu.edu.cnè¯†åˆ«å¤±è´¥ï¼Œèº«ä»½ï¼šæœªçŸ¥");
                                         return Code.CHANGE_EHHU;
                                     }
                                 }
                                 else{
                                     res.close();
-                                    log.error("´ò¿¨Ò³Ãæ½âÎöÊ§°Ü£¡");
+                                    log.error("æ‰“å¡é¡µé¢è§£æå¤±è´¥ï¼");
                                     return Code.CHANGE_EHHU;
                                 }
                             }
@@ -544,10 +544,10 @@ public class Application {
                                 document = Jsoup.parse(page);
                                 String msg = document.getElementById("msg").text();
                                 if(msg.isEmpty()){
-                                    log.error("ĞÂ°æÃÅ»§µÇÂ½Ê§°Ü£¡");
+                                    log.error("æ–°ç‰ˆé—¨æˆ·ç™»é™†å¤±è´¥ï¼");
                                 }
                                 else{
-                                    log.error("ĞÂ°æÃÅ»§µÇÂ½Ê§°Ü£¡Ô¶³Ì·şÎñÆ÷ÌáÊ¾:"+msg);
+                                    log.error("æ–°ç‰ˆé—¨æˆ·ç™»é™†å¤±è´¥ï¼è¿œç¨‹æœåŠ¡å™¨æç¤º:"+msg);
                                 }
                                 return Code.EXIT;
                             }
