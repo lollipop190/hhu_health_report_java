@@ -62,7 +62,7 @@
     </dependencies>
     <build>
         <!-- Maven Shade Plugin -->
-        <finalName>jcommander-app</finalName>
+        <finalName>jkdk</finalName>
         <plugins>
 
             <plugin>

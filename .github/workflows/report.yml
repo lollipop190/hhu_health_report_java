@@ -21,4 +21,6 @@ jobs:
       with:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '17'
-    - run: java -jar build/report.jar --user "${{ secrets.user }}"
+    - run: |
+        mvn clean package
+        java -jar target/jkdk.jar --user "${{ secrets.user }}"
